@@ -1,5 +1,5 @@
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+import { Badge } from "@/src/components/ui/badge";
+import { Button } from "@/src/components/ui/button";
 import { canAccessAdminPages } from "@/src/permissions/general";
 import { getCurrentUser } from "@/src/services/clerk";
 import { SignedIn, SignedOut, SignInButton, UserButton } from "@clerk/nextjs";
@@ -31,7 +31,7 @@ function Navbar() {
 
         <Link
           className="hover:bg-accent/10 flex items-center px-2"
-          href="/Admin/courses"
+          href="/admin/courses"
         >
           Courses
         </Link>
