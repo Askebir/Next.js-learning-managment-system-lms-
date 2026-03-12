@@ -6,18 +6,31 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { ActionButton } from "@/src/components/ActionButton";
 import { Button } from "@/src/components/ui/button";
 import { formatPlural } from "@/src/lib/formatters";
 import { Trash2Icon, TrashIcon } from "lucide-react";
 import Link from "next/link";
+import { deleteCourse } from "../actions/courses";
 
-export function CourseTable({ course }: { course: any[] }) {
+export function CourseTable({
+  courses,
+}: {
+  courses: {
+    id: string;
+    name: string;
+
+    sectionsCount: number;
+    lessonsCount: number;
+    studentsCount: number;
+  }[];
+}) {
   return (
     <Table>
       <TableHeader>
         <TableRow>
           <TableHead>
-            {formatPlural(course.length, {
+            {formatPlural(courses.length, {
               singular: "course",
               plural: "courses",
             })}
@@ -27,7 +40,7 @@ export function CourseTable({ course }: { course: any[] }) {
         </TableRow>
       </TableHeader>
       <TableBody>
-        {course.map((courses) => (
+        {courses.map((course) => (
           <TableRow key={course.id}>
             <TableCell>
               <div className="text-muted-foreground">
@@ -48,7 +61,11 @@ export function CourseTable({ course }: { course: any[] }) {
                 <Button asChild>
                   <Link href={`/admin/course/${course.id}/edit`}>Edit</Link>
                 </Button>
-                <ActionButton action={deleteCourse.bind(null, course.id)}>
+                <ActionButton
+                  variant="destructive"
+                  requireAreYouSure
+                  action={deleteCourse.bind(null, course.id)}
+                >
                   <Trash2Icon />
                   <span className="sr-only">Delete</span>
                 </ActionButton>
