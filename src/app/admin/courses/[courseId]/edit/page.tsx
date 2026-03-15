@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { Card, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { DialogTrigger } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { db } from "@/src";
@@ -50,6 +50,11 @@ export default async function EditCoursePage({
                 </DialogTrigger>
               </SectionFormDialog>
             </CardHeader>
+            <CardContent>
+              {course.courseSections.map((section) => (
+                <div key={section.id}>{section.name}</div>
+              ))}
+            </CardContent>
           </Card>
         </TabsContent>
         <TabsContent value="details">

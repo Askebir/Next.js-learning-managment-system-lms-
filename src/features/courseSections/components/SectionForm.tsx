@@ -30,12 +30,15 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { createSection, updateSection } from "../actions/section";
 
 export default function SectionForm({
   courseId,
   section,
+  onSuccess,
 }: {
   courseId: string;
+  onSuccess?: () => void;
   section?: {
     id: string;
     name: string;
@@ -50,16 +53,19 @@ export default function SectionForm({
     },
   });
 
-  //   async function onSubmit(values: z.infer<typeof sectionSchema>) {
-  //     const action =
-  //       section == null ? createsection : updateSection.bind(null, section.id);
-  //     const data = await action(values);
-  //   }
+  async function onSubmit(values: z.infer<typeof sectionSchema>) {
+    const action =
+      section == null
+        ? createSection.bind(null, courseId)
+        : updateSection.bind(null, section.id);
+    const data = await action(values);
+    if (!data.error) onSuccess?.();
+  }
 
   return (
     <Form {...form}>
       <form
-        // onSubmit={form.handleSubmit(onSubmit)}
+        onSubmit={form.handleSubmit(onSubmit)}
         className="flex gap-6 flex-col  @container "
       >
         <div className="grid gird-cols-1 @lg:grid-cols-2 gap-6">
