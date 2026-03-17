@@ -2,7 +2,9 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { DialogTrigger } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { cn } from "@/lib/utils";
 import { db } from "@/src";
+import { ActionButton } from "@/src/components/ActionButton";
 import PageHeader from "@/src/components/PageHeader";
 import {
   CourseSectionTable,
@@ -11,11 +13,13 @@ import {
 } from "@/src/drizzle/schema";
 import CourseForm from "@/src/features/courses/components/CourseForm";
 import { getCourseIdTag } from "@/src/features/courses/db/cache/courses";
+import { deleteSection } from "@/src/features/courseSections/actions/section";
 import { SectionFormDialog } from "@/src/features/courseSections/components/sectionFormDialog";
+import { SortableSectionList } from "@/src/features/courseSections/components/SortableSectionList";
 import { getCourseSectionCourseTag } from "@/src/features/courseSections/db/cache";
 import { getLessonCourseTag } from "@/src/features/lessons/db/cache/cache";
 import { asc, eq } from "drizzle-orm";
-import { PlusIcon } from "lucide-react";
+import { EyeClosed, EyeClosedIcon, PlusIcon, Trash2Icon } from "lucide-react";
 import { cacheTag } from "next/cache";
 import { notFound } from "next/navigation";
 
@@ -51,11 +55,41 @@ export default async function EditCoursePage({
               </SectionFormDialog>
             </CardHeader>
             <CardContent>
-              {course.courseSections.map((section) => (
-                <div key={section.id}>{section.name}</div>
-              ))}
+              <SortableSectionList
+                courseId={course.id}
+                sections={course.courseSections}
+              />
             </CardContent>
           </Card>
+          <hr className="my-4" />
+          {course.courseSections.map((section) => (
+            <Card key={section.id}>
+              <CardHeader className="flex items-center flex-row justify-between gap-10 ">
+                <CardTitle
+                  className={cn(
+                    "flex items-center gap-2",
+                    section.status === "private" && "text-muted-foreground",
+                  )}
+                >
+                  {" "}
+                  {section.status === "private" && <EyeClosed />} {section.name}
+                </CardTitle>
+                <SectionFormDialog courseId={courseId}>
+                  <DialogTrigger asChild>
+                    <Button variant="outline">
+                      <PlusIcon /> New Lesson
+                    </Button>
+                  </DialogTrigger>
+                </SectionFormDialog>
+              </CardHeader>
+              <CardContent>
+                <SortableSectionList
+                  courseId={course.id}
+                  sections={course.courseSections}
+                />
+              </CardContent>
+            </Card>
+          ))}
         </TabsContent>
         <TabsContent value="details">
           <Card>

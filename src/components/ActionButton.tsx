@@ -1,14 +1,10 @@
 "use client";
 
-import {
-  ComponentProps,
-  ComponentPropsWithRef,
-  ReactNode,
-  useTransition,
-} from "react";
+import { ComponentPropsWithRef, ReactNode, useTransition } from "react";
 import { Button } from "./ui/button";
 import { cn } from "@/lib/utils";
 import { Loader2Icon } from "lucide-react";
+
 import {
   AlertDialog,
   AlertDialogAction,
@@ -24,52 +20,57 @@ import {
 export function ActionButton({
   action,
   requireAreYouSure,
+  children,
   ...props
 }: Omit<ComponentPropsWithRef<typeof Button>, "onClick"> & {
-  action: () => Promise<{ error: boolean; message: string }>;
+  action: () => Promise<unknown>;
   requireAreYouSure?: boolean;
 }) {
-  {
-    const [isLoading, startTransition] = useTransition();
+  const [isLoading, startTransition] = useTransition();
 
-    function performAction() {
-      startTransition(async () => {
-        const data = await action();
-      });
-    }
+  function performAction() {
+    startTransition(async () => {
+      await action();
+    });
+  }
 
-    if (requireAreYouSure) {
-      return (
-        <AlertDialog open={isLoading ? true : undefined}>
-          <AlertDialogTrigger asChild>
-            <Button {...props} />
-          </AlertDialogTrigger>
-          <AlertDialogContent>
-            <AlertDialogHeader>
-              <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-              <AlertDialogDescription>
-                This action cannot be undone
-              </AlertDialogDescription>
-            </AlertDialogHeader>
-            <AlertDialogFooter>
-              <AlertDialogCancel>Cancel</AlertDialogCancel>
-              <AlertDialogAction disabled={isLoading} onClick={performAction}>
-                <LoadingTextSwap isLoading={isLoading}>Yes</LoadingTextSwap>
-              </AlertDialogAction>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
-      );
-    }
-
+  if (requireAreYouSure) {
     return (
-      <Button {...props} onClick={performAction}>
-        <LoadingTextSwap isLoading={isLoading}>
-          {props.children}
-        </LoadingTextSwap>
-      </Button>
+      <AlertDialog>
+        <AlertDialogTrigger asChild>
+          <Button {...props}>
+            <LoadingTextSwap isLoading={isLoading}>{children}</LoadingTextSwap>
+          </Button>
+        </AlertDialogTrigger>
+
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+
+            <AlertDialogAction
+              disabled={isLoading}
+              onClick={() => performAction()}
+            >
+              <LoadingTextSwap isLoading={isLoading}>Yes</LoadingTextSwap>
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     );
   }
+
+  return (
+    <Button {...props} onClick={performAction}>
+      <LoadingTextSwap isLoading={isLoading}>{children}</LoadingTextSwap>
+    </Button>
+  );
 }
 
 function LoadingTextSwap({
@@ -89,9 +90,10 @@ function LoadingTextSwap({
       >
         {children}
       </div>
+
       <div
         className={cn(
-          "col-start-1 col-end-2 row-start-1 row-end-2 text-center",
+          "col-start-1 col-end-2 row-start-1 row-end-2",
           isLoading ? "visible" : "invisible",
         )}
       >

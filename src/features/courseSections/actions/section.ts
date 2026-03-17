@@ -14,6 +14,7 @@ import {
   insertSection,
   updateSection as updateSectionDb,
   deleteSection as deleteSectionDB,
+  updateSectionOrders as updateSectionOrdersDb,
 } from "../db/section";
 
 export async function createSection(
@@ -47,11 +48,28 @@ export async function updateSection(
   return { error: false, message: "Successfully updated your course" };
 }
 
-export async function deleteCourse(id: string) {
+export async function deleteSection(id: string) {
   if (!canDeleteCourseSections(await getCurrentUser())) {
     return { error: true, message: "Error deleting your section" };
   }
 
   await deleteSectionDB(id);
   return { error: false, message: "Successsfully deleted your section" };
+}
+
+export async function updateSectionOrders(sectionIds: string[]) {
+  if (
+    sectionIds.length === 0 ||
+    !canUpdateCourseSections(await getCurrentUser())
+  ) {
+    return { error: true, message: "Error reordering your sections" };
+  }
+
+  await updateSectionOrdersDb(sectionIds);
+
+  return { error: false, message: "Successfully reordered your sections" };
+}
+
+export async function DeleteAction(id: string) {
+  await deleteSection(id);
 }

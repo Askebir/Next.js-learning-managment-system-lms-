@@ -9,7 +9,11 @@ export default function ClerkProviderWrapper({
 }) {
   return (
     <Suspense fallback={null}>
-      <ClerkProvider>{children}</ClerkProvider>
+      <ClerkProvider>
+        <html>
+          <body>{children}</body>
+        </html>
+      </ClerkProvider>
     </Suspense>
   );
 }
