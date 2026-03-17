@@ -74,18 +74,21 @@ export default async function EditCoursePage({
                   {" "}
                   {section.status === "private" && <EyeClosed />} {section.name}
                 </CardTitle>
-                <SectionFormDialog courseId={courseId}>
+                <LessonFormDialog
+                  defaultSectionId={section.id}
+                  section={course.courseSections}
+                >
                   <DialogTrigger asChild>
                     <Button variant="outline">
                       <PlusIcon /> New Lesson
                     </Button>
                   </DialogTrigger>
-                </SectionFormDialog>
+                </LessonFormDialog>
               </CardHeader>
               <CardContent>
-                <SortableSectionList
-                  courseId={course.id}
-                  sections={course.courseSections}
+                <SortableLessonList
+                  section={course.courseSections}
+                  lessons={section.lessons}
                 />
               </CardContent>
             </Card>
