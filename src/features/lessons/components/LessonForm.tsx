@@ -24,7 +24,6 @@ import {
   LessonStatus,
   lessonStatuses,
 } from "@/src/drizzle/schema";
-import { sectionSchema } from "../db/schema/sections";
 import {
   Select,
   SelectContent,
@@ -32,8 +31,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { createSection, updateSection } from "../actions/section";
 import { lessonSchema } from "../schemas/lesson";
+import { updateLesson } from "../db/lesson";
+import { createLesson } from "../actions/lesson";
 
 export default function LessonForm({
   sections,
@@ -46,7 +46,7 @@ export default function LessonForm({
     id: string;
     name: string;
   }[];
-  defaultSectionId: string;
+  defaultSectionId?: string;
   lesson?: {
     id: string;
     name: string;
@@ -57,7 +57,7 @@ export default function LessonForm({
   };
 }) {
   const form = useForm<z.infer<typeof lessonSchema>>({
-    resolver: zodResolver(sectionSchema),
+    resolver: zodResolver(lessonSchema),
     defaultValues: {
       name: lesson?.name ?? "",
       status: lesson?.status ?? "public",
@@ -67,13 +67,10 @@ export default function LessonForm({
     },
   });
 
-  async function onSubmit(values: z.infer<typeof sectionSchema>) {
+  async function onSubmit(values: z.infer<typeof lessonSchema>) {
     const action =
-      section == null
-        ? createSection.bind(null, courseId)
-        : updateSection.bind(null, section.id);
+      lesson == null ? createLesson : updateLesson.bind(null, lesson.id);
     const data = await action(values);
-    if (!data.error) onSuccess?.();
   }
 
   const videoId = form.watch("youtubeVideoId");
@@ -103,7 +100,7 @@ export default function LessonForm({
           />
           <FormField
             control={form.control}
-            name="name"
+            name="youtubeVideoId"
             render={({ field }) => (
               <FormItem>
                 <FormLabel>
@@ -113,6 +110,34 @@ export default function LessonForm({
                 <FormControl>
                   <Input {...field} />
                 </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="status"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Status</FormLabel>
+                <Select
+                  onValueChange={field.onChange}
+                  defaultValue={field.value}
+                >
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    {lessonStatuses.map((status) => (
+                      <SelectItem key={status} value={status}>
+                        {status}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
                 <FormMessage />
               </FormItem>
             )}
@@ -145,33 +170,6 @@ export default function LessonForm({
               </FormItem>
             )}
           />
-          <FormField
-            control={form.control}
-            name="status"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Status</FormLabel>
-                <Select
-                  onValueChange={field.onChange}
-                  defaultValue={field.value}
-                >
-                  <FormControl>
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    {lessonStatuses.map((status) => (
-                      <SelectItem key={status} value={status}>
-                        {status}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
         </div>
         <FormField
           control={form.control}
@@ -196,7 +194,7 @@ export default function LessonForm({
         <div className="self-end">
           <Button disabled={form.formState.isSubmitting}>Save</Button>
         </div>
-        {/* {videoId && <YouTubeVideoPlayer videoId={videoId} />} */}
+        {videoId && <YouTubeVideoPlayer videoId={videoId} />}
       </form>
     </Form>
   );

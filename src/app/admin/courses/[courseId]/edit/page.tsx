@@ -17,6 +17,8 @@ import { deleteSection } from "@/src/features/courseSections/actions/section";
 import { SectionFormDialog } from "@/src/features/courseSections/components/sectionFormDialog";
 import { SortableSectionList } from "@/src/features/courseSections/components/SortableSectionList";
 import { getCourseSectionCourseTag } from "@/src/features/courseSections/db/cache";
+import { LessonFormDialog } from "@/src/features/lessons/components/LessonFormDialog";
+import { SortableLessonList } from "@/src/features/lessons/components/SortableLessonList";
 import { getLessonCourseTag } from "@/src/features/lessons/db/cache/cache";
 import { asc, eq } from "drizzle-orm";
 import { EyeClosed, EyeClosedIcon, PlusIcon, Trash2Icon } from "lucide-react";
@@ -76,7 +78,7 @@ export default async function EditCoursePage({
                 </CardTitle>
                 <LessonFormDialog
                   defaultSectionId={section.id}
-                  section={course.courseSections}
+                  sections={course.courseSections}
                 >
                   <DialogTrigger asChild>
                     <Button variant="outline">
@@ -87,7 +89,7 @@ export default async function EditCoursePage({
               </CardHeader>
               <CardContent>
                 <SortableLessonList
-                  section={course.courseSections}
+                  sections={course.courseSections}
                   lessons={section.lessons}
                 />
               </CardContent>

@@ -10,17 +10,24 @@ import { deleteSection, updateSection } from "../db/section";
 import { cn } from "@/lib/utils";
 import { DeleteAction, updateSectionOrders } from "../actions/section";
 
-export function SortableSectionList({
-  courseId,
+export function SortableLessonList({
+
   sections,
+  lessons,
 }: {
-  courseId: string;
+  
   sections: {
     id: string;
     name: string;
-    status: CourseSectionStatus;
+   
   }[];
+  lessons:{
+    id:string;
+    name:string;
+    status:CourseSectionStatus
+  }[]
 }) {
+
   return (
     <SortableList items={sections} onOrderChange={updateSectionOrders}>
       {(items) =>
