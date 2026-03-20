@@ -15,22 +15,20 @@ export async function getNextCourseLessonOrder(sectionId: string) {
 }
 
 export async function insertLesson(data: typeof LessonTable.$inferInsert) {
-  const [newLesson, courseId] = await db.transaction(async (trx) => {
-    const [[newLesson], section] = await Promise.all([
-      trx.insert(LessonTable).values(data).returning(),
-      trx.query.CourseSectionTable.findFirst({
-        columns: { courseId: true },
-        where: eq(CourseSectionTable.id, data.sectionId),
-      }),
-    ]);
+  // insert lesson
+  const [newLesson] = await db.insert(LessonTable).values(data).returning();
 
-    if (section == null) return trx.rollback();
-    return [newLesson, section.courseId];
+  if (!newLesson) throw new Error("NewLesson not found");
+
+  // get courseId from section
+  const section = await db.query.CourseSectionTable.findFirst({
+    columns: { courseId: true },
+    where: eq(CourseSectionTable.id, data.sectionId),
   });
 
-  if (newLesson == null) throw new Error("Failed to create lesson");
+  if (!section) throw new Error("Section not found");
 
-  revalidateLessonCache({ courseId, id: newLesson.id });
+  revalidateLessonCache({ courseId: section.courseId, id: newLesson.id });
 
   return newLesson;
 }
@@ -39,107 +37,105 @@ export async function updateLesson(
   id: string,
   data: Partial<typeof LessonTable.$inferInsert>,
 ) {
-  const [updatedLesson, courseId] = await db.transaction(async (trx) => {
-    const currentLesson = await trx.query.LessonTable.findFirst({
-      where: eq(LessonTable.id, id),
-      columns: { sectionId: true },
-    });
-
-    if (
-      data.sectionId != null &&
-      currentLesson?.sectionId !== data.sectionId &&
-      data.order == null
-    ) {
-      data.order = await getNextCourseLessonOrder(data.sectionId);
-    }
-
-    const [updatedLesson] = await trx
-      .update(LessonTable)
-      .set(data)
-      .where(eq(LessonTable.id, id))
-      .returning();
-    if (updatedLesson == null) {
-      throw (trx.rollback(), new Error("Failed to update lesson"));
-    }
-
-    const section = await trx.query.CourseSectionTable.findFirst({
-      columns: { courseId: true },
-      where: eq(CourseSectionTable.id, updatedLesson?.sectionId),
-    });
-
-    if (section == null) return trx.rollback();
-    return [updatedLesson, section.courseId];
+  // get current lesson
+  const currentLesson = await db.query.LessonTable.findFirst({
+    where: eq(LessonTable.id, id),
+    columns: { sectionId: true },
   });
 
-  revalidateLessonCache({ courseId, id: updatedLesson.id });
+  if (!currentLesson) throw new Error("Lesson not found");
 
-  return updateLesson;
+  // if section changed but order not provided, calculate order
+  if (
+    data.sectionId != null &&
+    currentLesson.sectionId !== data.sectionId &&
+    data.order == null
+  ) {
+    data.order = await getNextCourseLessonOrder(data.sectionId);
+  }
+
+  // update lesson
+  const [updatedLesson] = await db
+    .update(LessonTable)
+    .set(data)
+    .where(eq(LessonTable.id, id))
+    .returning();
+
+  if (!updatedLesson) throw new Error("Failed to update lesson");
+
+  // get courseId for cache
+  const section = await db.query.CourseSectionTable.findFirst({
+    columns: { courseId: true },
+    where: eq(CourseSectionTable.id, updatedLesson.sectionId),
+  });
+
+  if (!section) throw new Error("Section not found");
+
+  revalidateLessonCache({ courseId: section.courseId, id: updatedLesson.id });
+
+  return updatedLesson;
 }
 
 export async function deleteLesson(id: string) {
-  const [deleteLesson, courseId] = await db.transaction(async (trx) => {
-    const [deleteLesson] = await trx
-      .delete(LessonTable)
-      .where(eq(LessonTable.id, id))
-      .returning();
-    if (deleteLesson == null) {
-      trx.rollback();
-      throw new Error("Failed to delete lesson");
-    }
+  // delete lesson
+  const [deletedLesson] = await db
+    .delete(LessonTable)
+    .where(eq(LessonTable.id, id))
+    .returning();
 
-    const section = await trx.query.CourseSectionTable.findFirst({
-      columns: { courseId: true },
-      where: ({ id }, { eq }) => eq(id, deleteLesson.sectionId),
-    });
-    if (section == null) return trx.rollback();
-    return [deleteLesson, section.courseId];
+  if (!deletedLesson) throw new Error("Failed to delete lesson");
+
+  // get courseId for cache
+  const section = await db.query.CourseSectionTable.findFirst({
+    columns: { courseId: true },
+    where: eq(CourseSectionTable.id, deletedLesson.sectionId),
   });
+
+  if (!section) throw new Error("Section not found");
 
   revalidateLessonCache({
-    id: deleteLesson.id,
-    courseId,
+    courseId: section.courseId,
+    id: deletedLesson.id,
   });
 
-  return deleteLesson;
+  return deletedLesson;
 }
 
 export async function updateLessonOrders(lessonIds: string[]) {
+  if (lessonIds.length === 0)
+    return { error: true, message: "No lessons provided" };
+
   try {
-    const [lessons, courseId] = await db.transaction(async (trx) => {
-      const lessons = await Promise.all(
-        lessonIds.map((id, index) =>
-          trx
-            .update(LessonTable)
-            .set({ order: index })
-            .where(eq(LessonTable.id, id))
-            .returning({
-              sectionId: LessonTable.sectionId,
-              id: LessonTable.id,
-            }),
-        ),
-      );
+    const lessons = [];
 
-      const sectionId = lessons[0]?.[0]?.sectionId;
-      if (sectionId == null) return trx.rollback();
+    for (let index = 0; index < lessonIds.length; index++) {
+      const lessonId = lessonIds[index];
+      if (!lessonId) throw new Error(`Invalid lesson id at index ${index}`);
 
-      const section = await trx.query.CourseSectionTable.findFirst({
-        columns: { courseId: true },
-        where: ({ id }, { eq }) => eq(id, sectionId),
-      });
+      const [lesson] = await db
+        .update(LessonTable)
+        .set({ order: index })
+        .where(eq(LessonTable.id, lessonId)) // now guaranteed string
+        .returning({ sectionId: LessonTable.sectionId, id: LessonTable.id });
 
-      if (section == null) return trx.rollback();
-
-      return [lessons, section.courseId] as const;
+      if (!lesson)
+        throw new Error(`Failed to update lesson order for ${lessonId}`);
+      lessons.push(lesson);
+    }
+    // get courseId from first lesson's section
+    const sectionId = lessons[0]?.sectionId;
+    if (sectionId == null) throw new Error("sectionId error");
+    const section = await db.query.CourseSectionTable.findFirst({
+      columns: { courseId: true },
+      where: eq(CourseSectionTable.id, sectionId),
     });
 
-    lessons.flat().forEach(({ id }) => {
-      revalidateLessonCache({
-        courseId,
-        id,
-      });
+    if (!section) throw new Error("Section not found");
+
+    lessons.forEach(({ id }) => {
+      revalidateLessonCache({ courseId: section.courseId, id });
     });
 
-    // ✅ RETURN THIS
     return { error: false, message: "Order updated successfully" };
   } catch (err) {
     return { error: true, message: "Failed to update order" };

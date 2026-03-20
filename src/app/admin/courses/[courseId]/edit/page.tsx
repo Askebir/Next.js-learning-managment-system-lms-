@@ -42,7 +42,7 @@ export default async function EditCoursePage({
           <TabsTrigger value="lessons">Lessons</TabsTrigger>
           <TabsTrigger value="details">Details</TabsTrigger>
         </TabsList>
-        <TabsContent value="lessons">
+        <TabsContent value="lessons" className="flex flex-col gap-2">
           <Card>
             <CardHeader className="flex items-center flex-row justify-between">
               <CardTitle>Sections</CardTitle>
@@ -61,7 +61,7 @@ export default async function EditCoursePage({
               />
             </CardContent>
           </Card>
-          <hr className="my-4" />
+          <hr className="my-2" />
           {course.courseSections.map((section) => (
             <Card key={section.id}>
               <CardHeader className="flex items-center flex-row justify-between gap-10 ">
@@ -109,11 +109,12 @@ export default async function EditCoursePage({
 async function getCourse(id: string) {
   "use cache";
 
-  cacheTag(
-    getCourseIdTag(id),
-    getCourseSectionCourseTag(id),
-    await getLessonCourseTag(id),
-  );
+  const courseTag = getCourseIdTag(id); // if this is synchronous, fine
+  const sectionTag = getCourseSectionCourseTag(id); // if synchronous, fine
+  const lessonTag = await getLessonCourseTag(id); // async, must await
+
+  // now all tags are strings
+  cacheTag(courseTag, sectionTag, lessonTag);
   return db.query.CourseTable.findFirst({
     columns: { id: true, name: true, description: true },
     where: eq(CourseTable.id, id),

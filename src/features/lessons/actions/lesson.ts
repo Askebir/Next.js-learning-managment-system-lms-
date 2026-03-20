@@ -40,6 +40,7 @@ export async function updateLesson(
   }
 
   await updateLessonDb(id, data);
+  return { error: false, message: "Lesson updated successfully" };
 }
 
 export async function deleteLesson(id: string) {

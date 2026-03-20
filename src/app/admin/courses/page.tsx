@@ -40,7 +40,7 @@ async function getCourse() {
     getCourseGlobalTag(),
     getUserCourseAccessGlobalTag(),
     getUserCourseSectionGlobalTag(),
-    getLessonGlobalTag(),
+    await getLessonGlobalTag(),
   );
 
   return db

@@ -69,9 +69,11 @@ export default function LessonForm({
   async function onSubmit(values: z.infer<typeof lessonSchema>) {
     const action =
       lesson == null ? createLesson : updateLesson.bind(null, lesson.id);
-    const data = await action(values);
-  }
 
+    const res = await action(values);
+
+    onSuccess?.(); // ✅ THIS CLOSES THE DIALOG
+  }
   // const videoId = form.watch("youtubeVideoId");
 
   return (
@@ -175,10 +177,7 @@ export default function LessonForm({
           name="description"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>
-                <RequiredLabelIcon />
-                Description
-              </FormLabel>
+              <FormLabel>Description</FormLabel>
               <FormControl>
                 <Textarea
                   className="min-h-20 resize-none"
@@ -191,7 +190,9 @@ export default function LessonForm({
           )}
         />
         <div className="self-end">
-          <Button disabled={form.formState.isSubmitting}>Save</Button>
+          <Button disabled={form.formState.isSubmitting}>
+            {form.formState.isSubmitting ? "Saving..." : "Save"}
+          </Button>
         </div>
         {/* {videoId && <YouTubeVideoPlayer videoId={videoId} />} */}
       </form>
