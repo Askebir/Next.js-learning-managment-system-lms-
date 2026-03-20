@@ -1,6 +1,9 @@
 import type { NextConfig } from "next";
-const nextConfig = {
-  cacheComponents: true,
+
+const nextConfig: NextConfig = {
+  webpack(config) {
+    return config;
+  },
 };
 
 export default nextConfig;

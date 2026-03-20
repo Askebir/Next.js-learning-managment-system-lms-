@@ -33,6 +33,7 @@ import {
 import { lessonSchema } from "../schemas/lesson";
 import { updateLesson } from "../db/lesson";
 import { createLesson } from "../actions/lesson";
+import { YouTubeVideoPlayer } from "./YouTubeVideoPlayer";
 
 export default function LessonForm({
   sections,
@@ -74,7 +75,8 @@ export default function LessonForm({
 
     onSuccess?.(); // ✅ THIS CLOSES THE DIALOG
   }
-  // const videoId = form.watch("youtubeVideoId");
+  const videoId = form.watch("youtubeVideoId");
+  console.log("video ID", videoId);
 
   return (
     <Form {...form}>
@@ -194,7 +196,7 @@ export default function LessonForm({
             {form.formState.isSubmitting ? "Saving..." : "Save"}
           </Button>
         </div>
-        {/* {videoId && <YouTubeVideoPlayer videoId={videoId} />} */}
+        {videoId && <YouTubeVideoPlayer videoId={videoId} />}
       </form>
     </Form>
   );
