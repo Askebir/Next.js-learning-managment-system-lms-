@@ -1,5 +1,4 @@
 "use server";
-
 import z from "zod";
 import { lessonSchema } from "../schemas/lesson";
 import { getCurrentUser } from "@/src/services/clerk";
@@ -13,7 +12,7 @@ import {
   insertLesson,
   updateLesson as updateLessonDb,
   deleteLesson as deleteLessonDb,
-  updateLessonOrders as updateLessonOrdersDb,
+  updateLessonOrders,
 } from "../db/lesson";
 
 export async function createLesson(unsafeData: z.infer<typeof lessonSchema>) {
@@ -58,7 +57,7 @@ export async function updateLessonOrder(lessonIds: string[]) {
     return { error: true, message: "Error reordering your lessons" };
   }
 
-  await updateLessonOrdersDb(lessonIds);
+  await updateLessonOrders(lessonIds);
 
   return { error: false, message: "Successfully reordered your lessons" };
 }

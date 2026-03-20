@@ -1,26 +1,28 @@
+"use server";
+
 import { getCourseTag, getGlobalTag, getIdTag } from "@/src/lib/dataCache";
 import { revalidateTag } from "next/cache";
 
-export function getLessonGlobalTag() {
+export async function getLessonGlobalTag() {
   return getGlobalTag("lessons");
 }
 
-export function getLessonIdTag(id: string) {
+export async function getLessonIdTag(id: string) {
   return getIdTag("lessons", id);
 }
 
-export function getLessonCourseTag(courseId: string) {
+export async function getLessonCourseTag(courseId: string) {
   return getCourseTag("lessons", courseId);
 }
 
-export function revalidateLessonCache({
+export async function revalidateLessonCache({
   id,
   courseId,
 }: {
   id: string;
   courseId: string;
 }) {
-  revalidateTag(getLessonGlobalTag(), "max");
-  revalidateTag(getLessonIdTag(id), "max");
-  revalidateTag(getLessonCourseTag(courseId), "max");
+  revalidateTag(await getLessonGlobalTag(), "max");
+  revalidateTag(await getLessonIdTag(id), "max");
+  revalidateTag(await getLessonCourseTag(courseId), "max");
 }

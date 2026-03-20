@@ -37,7 +37,7 @@ export function SortableLessonList({
           <SortableItem
             key={lesson.id}
             id={lesson.id}
-            className="flex items-center bg-red-500 justify-between gap-1"
+            className="flex items-center justify-between gap-1"
           >
             <div
               className={cn(

@@ -28,7 +28,7 @@ export function SortableSectionList({
           <SortableItem
             key={section.id}
             id={section.id}
-            className="flex items-center bg-red-500 justify-between gap-1"
+            className="flex items-centerjustify-between gap-1"
           >
             <div
               className={cn(

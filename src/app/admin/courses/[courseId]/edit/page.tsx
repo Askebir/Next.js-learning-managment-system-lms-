@@ -112,7 +112,7 @@ async function getCourse(id: string) {
   cacheTag(
     getCourseIdTag(id),
     getCourseSectionCourseTag(id),
-    getLessonCourseTag(id),
+    await getLessonCourseTag(id),
   );
   return db.query.CourseTable.findFirst({
     columns: { id: true, name: true, description: true },

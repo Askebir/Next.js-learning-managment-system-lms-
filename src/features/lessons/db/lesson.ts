@@ -1,3 +1,4 @@
+"use server";
 import { db } from "@/src";
 import { CourseSectionTable, LessonTable } from "@/src/drizzle/schema";
 import { eq } from "drizzle-orm";
