@@ -1,3 +1,5 @@
+"use server";
+
 import z from "zod";
 import { lessonSchema } from "../schemas/lesson";
 import { getCurrentUser } from "@/src/services/clerk";

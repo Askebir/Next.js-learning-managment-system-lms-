@@ -103,37 +103,44 @@ export async function deleteLesson(id: string) {
 }
 
 export async function updateLessonOrders(lessonIds: string[]) {
-  const [lessons, courseId] = await db.transaction(async (trx) => {
-    const lessons = await Promise.all(
-      lessonIds.map((id, index) =>
-        db
-          .update(LessonTable)
-          .set({ order: index })
-          .where(eq(LessonTable.id, id))
-          .returning({
-            sectionId: LessonTable.sectionId,
-            id: LessonTable.id,
-          }),
-      ),
-    );
+  try {
+    const [lessons, courseId] = await db.transaction(async (trx) => {
+      const lessons = await Promise.all(
+        lessonIds.map((id, index) =>
+          trx
+            .update(LessonTable)
+            .set({ order: index })
+            .where(eq(LessonTable.id, id))
+            .returning({
+              sectionId: LessonTable.sectionId,
+              id: LessonTable.id,
+            }),
+        ),
+      );
 
-    const sectionId = lessons[0]?.[0]?.sectionId;
-    if (sectionId == null) return trx.rollback();
+      const sectionId = lessons[0]?.[0]?.sectionId;
+      if (sectionId == null) return trx.rollback();
 
-    const section = await trx.query.CourseSectionTable.findFirst({
-      columns: { courseId: true },
-      where: ({ id }, { eq }) => eq(id, sectionId),
+      const section = await trx.query.CourseSectionTable.findFirst({
+        columns: { courseId: true },
+        where: ({ id }, { eq }) => eq(id, sectionId),
+      });
+
+      if (section == null) return trx.rollback();
+
+      return [lessons, section.courseId] as const;
     });
 
-    if (section == null) return trx.rollback();
-
-    return [lessons, section.courseId];
-  });
-
-  lessons.flat().forEach(({ id }) => {
-    revalidateLessonCache({
-      courseId,
-      id,
+    lessons.flat().forEach(({ id }) => {
+      revalidateLessonCache({
+        courseId,
+        id,
+      });
     });
-  });
+
+    // ✅ RETURN THIS
+    return { error: false, message: "Order updated successfully" };
+  } catch (err) {
+    return { error: true, message: "Failed to update order" };
+  }
 }

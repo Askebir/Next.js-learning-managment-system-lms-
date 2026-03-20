@@ -4,7 +4,6 @@ import { DialogTrigger } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { cn } from "@/lib/utils";
 import { db } from "@/src";
-import { ActionButton } from "@/src/components/ActionButton";
 import PageHeader from "@/src/components/PageHeader";
 import {
   CourseSectionTable,
@@ -13,7 +12,6 @@ import {
 } from "@/src/drizzle/schema";
 import CourseForm from "@/src/features/courses/components/CourseForm";
 import { getCourseIdTag } from "@/src/features/courses/db/cache/courses";
-import { deleteSection } from "@/src/features/courseSections/actions/section";
 import { SectionFormDialog } from "@/src/features/courseSections/components/sectionFormDialog";
 import { SortableSectionList } from "@/src/features/courseSections/components/SortableSectionList";
 import { getCourseSectionCourseTag } from "@/src/features/courseSections/db/cache";

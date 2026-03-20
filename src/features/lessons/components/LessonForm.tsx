@@ -73,7 +73,7 @@ export default function LessonForm({
     const data = await action(values);
   }
 
-  const videoId = form.watch("youtubeVideoId");
+  // const videoId = form.watch("youtubeVideoId");
 
   return (
     <Form {...form}>
@@ -194,7 +194,7 @@ export default function LessonForm({
         <div className="self-end">
           <Button disabled={form.formState.isSubmitting}>Save</Button>
         </div>
-        {videoId && <YouTubeVideoPlayer videoId={videoId} />}
+        {/* {videoId && <YouTubeVideoPlayer videoId={videoId} />} */}
       </form>
     </Form>
   );
