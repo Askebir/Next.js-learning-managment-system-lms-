@@ -11,10 +11,11 @@ import { Button } from "@/src/components/ui/button";
 import { formatPlural, formatPrice } from "@/src/lib/formatters";
 import { EyeIcon, LockIcon, Trash2Icon, TrashIcon } from "lucide-react";
 import Link from "next/link";
-import { deleteCourse } from "../actions/courses";
+
 import { ProductStatuses } from "@/src/drizzle/schema";
 import Image from "next/image";
 import { Badge } from "@/src/components/ui/badge";
+import { deleteProduct } from "../action/products";
 
 export function PrdouctTable({
   products,
@@ -22,7 +23,7 @@ export function PrdouctTable({
   products: {
     id: string;
     name: string;
-    desscription: string;
+    description: string;
     imageUrl: string;
     priceInDollars: number;
     status: ProductStatuses;

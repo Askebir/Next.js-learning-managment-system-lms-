@@ -20,6 +20,7 @@ import { asc, countDistinct, eq } from "drizzle-orm";
 import { getUserCourseAccessGlobalTag } from "@/src/features/courses/db/cache/userCourseAccess";
 import { getUserCourseSectionGlobalTag } from "@/src/features/courseSections/db/cache";
 import { getLessonGlobalTag } from "@/src/features/lessons/db/cache/cache";
+import { PrdouctTable } from "@/src/features/products/components/ProductTable";
 
 export default async function ProdcutsPage() {
   const products = await getProducts();
@@ -31,8 +32,7 @@ export default async function ProdcutsPage() {
           <Link href="/admin/products/new">New Product</Link>
         </Button>
       </PageHeader>
-
-      <ProductTable prodcuts={products} />
+      <PrdouctTable products={products} />
     </div>
   );
 }
