@@ -43,16 +43,19 @@ export function CourseTable({
         {courses.map((course) => (
           <TableRow key={course.id}>
             <TableCell>
-              <div className="text-muted-foreground">
-                {formatPlural(course.sectionsCount, {
-                  singular: "section",
-                  plural: "sections",
-                })}{" "}
-                ●{""}
-                {formatPlural(course.lessonsCount, {
-                  singular: "lesson",
-                  plural: "lessons",
-                })}
+              <div>
+                <div>{course.name}</div>
+                <div className="text-muted-foreground">
+                  {formatPlural(course.sectionsCount, {
+                    singular: "section",
+                    plural: "sections",
+                  })}{" "}
+                  ●{""}
+                  {formatPlural(course.lessonsCount, {
+                    singular: "lesson",
+                    plural: "lessons",
+                  })}
+                </div>
               </div>
             </TableCell>
             <TableCell>{course.studentsCount}</TableCell>

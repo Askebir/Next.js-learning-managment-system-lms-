@@ -196,7 +196,11 @@ export default function LessonForm({
             {form.formState.isSubmitting ? "Saving..." : "Save"}
           </Button>
         </div>
-        {videoId && <YouTubeVideoPlayer videoId={videoId} />}
+        {videoId && (
+          <div className="aspect-video">
+            <YouTubeVideoPlayer videoId={videoId} />
+          </div>
+        )}
       </form>
     </Form>
   );
