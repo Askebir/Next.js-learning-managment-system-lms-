@@ -1,9 +1,11 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  webpack(config) {
-    return config;
-  },
+  // Enable experimental caching for server components
+  cacheComponents: true,
+
+  // Minimal Turbopack config
+  turbopack: {},
 };
 
 export default nextConfig;

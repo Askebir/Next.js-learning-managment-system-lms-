@@ -20,7 +20,7 @@ import { SortableLessonList } from "@/src/features/lessons/components/SortableLe
 import { getLessonCourseTag } from "@/src/features/lessons/db/cache/cache";
 import { asc, eq } from "drizzle-orm";
 import { EyeClosed, EyeClosedIcon, PlusIcon, Trash2Icon } from "lucide-react";
-import { cacheTag } from "next/cache";
+
 import { notFound } from "next/navigation";
 
 export default async function EditCoursePage({
@@ -107,14 +107,6 @@ export default async function EditCoursePage({
 }
 
 async function getCourse(id: string) {
-  "use cache";
-
-  const courseTag = getCourseIdTag(id); // if this is synchronous, fine
-  const sectionTag = getCourseSectionCourseTag(id); // if synchronous, fine
-  const lessonTag = await getLessonCourseTag(id); // async, must await
-
-  // now all tags are strings
-  cacheTag(courseTag, sectionTag, lessonTag);
   return db.query.CourseTable.findFirst({
     columns: { id: true, name: true, description: true },
     where: eq(CourseTable.id, id),

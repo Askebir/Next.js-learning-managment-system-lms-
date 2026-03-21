@@ -3,6 +3,7 @@ import { db } from "@/src";
 import { CourseSectionTable, LessonTable } from "@/src/drizzle/schema";
 import { eq } from "drizzle-orm";
 import { revalidateLessonCache } from "./cache/cache";
+import { revalidatePath } from "next/cache";
 
 export async function getNextCourseLessonOrder(sectionId: string) {
   const lesson = await db.query.LessonTable.findFirst({
@@ -28,7 +29,7 @@ export async function insertLesson(data: typeof LessonTable.$inferInsert) {
 
   if (!section) throw new Error("Section not found");
 
-  revalidateLessonCache({ courseId: section.courseId, id: newLesson.id });
+  revalidatePath("/admin/courses/[courseId]/edit ");
 
   return newLesson;
 }
@@ -70,8 +71,7 @@ export async function updateLesson(
   });
 
   if (!section) throw new Error("Section not found");
-
-  revalidateLessonCache({ courseId: section.courseId, id: updatedLesson.id });
+  revalidatePath("/admin/courses/[courseId]/edit ");
 
   return updatedLesson;
 }
@@ -93,10 +93,7 @@ export async function deleteLesson(id: string) {
 
   if (!section) throw new Error("Section not found");
 
-  revalidateLessonCache({
-    courseId: section.courseId,
-    id: deletedLesson.id,
-  });
+  revalidatePath("/admin/courses/[courseId]/edit ");
 
   return deletedLesson;
 }
@@ -131,10 +128,7 @@ export async function updateLessonOrders(lessonIds: string[]) {
     });
 
     if (!section) throw new Error("Section not found");
-
-    lessons.forEach(({ id }) => {
-      revalidateLessonCache({ courseId: section.courseId, id });
-    });
+    revalidatePath("/admin/courses/[courseId]/edit ");
 
     return { error: false, message: "Order updated successfully" };
   } catch (err) {
