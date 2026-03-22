@@ -3,7 +3,6 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { courseSchema } from "../schema/courses";
 import {
   Form,
   FormControl,
@@ -16,12 +15,18 @@ import { RequiredLabelIcon } from "@/src/components/RequiredLabelIcon";
 import { Input } from "@/src/components/ui/input";
 import { Textarea } from "@/src/components/ui/textarea";
 import { Button } from "@/src/components/ui/button";
-import { createCourse, updateCourses } from "../actions/courses";
 import { toast } from "sonner";
 import { productSchema } from "../schema/products";
 import { productStatuses, ProductStatuses } from "@/src/drizzle/schema";
-import { updateProduct } from "../db/products";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { MultiSelect } from "@/src/components/ui/custom/multi-select";
+import { createProduct, updateProduct } from "../action/products";
 
 export default function ProductForm({
   product,
@@ -31,25 +36,25 @@ export default function ProductForm({
     id: string;
     name: string;
     description: string;
-    priceInDollars:number
-    imageUrl:string;
-    status:ProductStatuses;
-    courseIds:string[]
+    priceInDollars: number;
+    imageUrl: string;
+    status: ProductStatuses;
+    courseIds: string[];
   };
-  courses:{
-    id:string;
-    name:string
-  }[]
-}) 
+  courses: {
+    id: string;
+    name: string;
+  }[];
+}) {
   const form = useForm<z.infer<typeof productSchema>>({
     resolver: zodResolver(productSchema),
-    defaultValues:product ?? {
+    defaultValues: product ?? {
       name: "",
       description: "",
-      courseIdS:[],
-      imageUrl:"",
-      priceInDollars:0,
-      status:"private"
+      courseIds: [],
+      imageUrl: "",
+      priceInDollars: 0,
+      status: "private",
     },
   });
 
@@ -60,92 +65,115 @@ export default function ProductForm({
   }
   return (
     <Form {...form}>
-
-      
-
-
       <form
         onSubmit={form.handleSubmit(onSubmit)}
         className="flex gap-6 flex-col"
       >
-        <div className="grid gap-6 grid-cols-1 md:grid-cols2 items-start" >
-
-    
-        <FormField
-          control={form.control}
-          name="name"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>
-                <RequiredLabelIcon />
-                Name
-              </FormLabel>
-              <FormControl>
-                <Input {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name="priceInDollars"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>
-                <RequiredLabelIcon />
-               price
-              </FormLabel>
-              <FormControl>
-                <Input type="number" {...field} step={1} min={0} onChange={e => field.onChange(e.target.valueAsNumber)} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+        <div className="grid gap-6 grid-cols-1 md:grid-cols2 items-start">
           <FormField
-          control={form.control}
-          name="imageUrl"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>
-                <RequiredLabelIcon />
-                Image Url
-              </FormLabel>
-              <FormControl>
-                <Input {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-           <FormField
-                    control={form.control}
-                    name="status"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Status</FormLabel>
-                        <Select
-                          onValueChange={field.onChange}
-                          defaultValue={field.value}
-                        >
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            {productStatuses.map((status) => (
-                              <SelectItem key={status} value={status}>
-                                {status}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                        <FormMessage />
-                      </FormItem>
-                    )}
+            control={form.control}
+            name="name"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>
+                  <RequiredLabelIcon />
+                  Name
+                </FormLabel>
+                <FormControl>
+                  <Input {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="priceInDollars"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>
+                  <RequiredLabelIcon />
+                  price
+                </FormLabel>
+                <FormControl>
+                  <Input
+                    type="number"
+                    {...field}
+                    step={1}
+                    min={0}
+                    value={field.value ?? 0} // ✅ Prevent NaN
+                    onChange={(e) => field.onChange(e.target.valueAsNumber)}
                   />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="imageUrl"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>
+                  <RequiredLabelIcon />
+                  Image Url
+                </FormLabel>
+                <FormControl>
+                  <Input {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="status"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Status</FormLabel>
+                <Select
+                  onValueChange={field.onChange}
+                  defaultValue={field.value}
+                >
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    {productStatuses.map((status) => (
+                      <SelectItem key={status} value={status}>
+                        {status}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="courseIds"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Included Courses</FormLabel>
+                <FormControl>
+                  <MultiSelect
+                    selectPlaceholder="Select course"
+                    searchPlaceholder="Search courses"
+                    options={courses}
+                    getLabel={(c) => c.name}
+                    getValue={(c) => c.id}
+                    selectedValues={field.value}
+                    onSelectedValuesChange={field.onChange}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
         <FormField
           control={form.control}
           name="description"
@@ -162,11 +190,9 @@ export default function ProductForm({
             </FormItem>
           )}
         />
-           </div>
         <div className="self-end">
           <Button disabled={form.formState.isSubmitting}>Save</Button>
         </div>
-       
       </form>
     </Form>
   );

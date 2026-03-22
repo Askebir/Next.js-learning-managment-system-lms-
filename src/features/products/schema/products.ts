@@ -10,5 +10,5 @@ export const productSchema = z.object({
     z.string().startsWith("/", "Invalid url"),
   ]),
   status: z.enum(productStatuses),
-  courseIdS: z.array(z.string()).min(1, "At least one course is requireds"),
+  courseIds: z.array(z.string()).min(1, "At least one course is requireds"),
 });

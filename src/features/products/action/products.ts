@@ -8,6 +8,7 @@ import {
   canDeleteProducts,
   canUpdateProducts,
 } from "../permissions/lessons";
+import { revalidatePath } from "next/cache";
 import { productSchema } from "../schema/products";
 import {
   insertProduct,
@@ -41,6 +42,7 @@ export async function deleteProduct(id: string) {
     return { error: true, message: "Error deleting your product" };
   }
   await deleteProductDb(id);
+  revalidatePath("/admin/products");
 
   return { error: false, message: "Successfully deleted your product" };
 }
