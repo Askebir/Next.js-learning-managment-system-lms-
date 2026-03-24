@@ -35,7 +35,7 @@ export async function updateProduct(
   }
 
   await updateProductDb(id, data);
-  redirect("/adimin/products");
+  redirect("/admin/products");
 }
 export async function deleteProduct(id: string) {
   if (!canDeleteProducts(await getCurrentUser())) {

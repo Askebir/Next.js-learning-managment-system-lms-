@@ -102,7 +102,13 @@ export default function ProductForm({
                     step={1}
                     min={0}
                     value={field.value ?? 0} // ✅ Prevent NaN
-                    onChange={(e) => field.onChange(e.target.valueAsNumber)}
+                    onChange={(e) =>
+                      field.onChange(
+                        isNaN(e.target.valueAsNumber)
+                          ? undefined
+                          : e.target.valueAsNumber,
+                      )
+                    }
                   />
                 </FormControl>
                 <FormMessage />
