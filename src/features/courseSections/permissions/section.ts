@@ -1,4 +1,4 @@
-import { UserRole } from "@/src/drizzle/schema";
+import { CourseSectionTable, UserRole } from "@/src/drizzle/schema";
 
 export function canCreateCourseSections({ role }: { role?: UserRole }) {
   return role === "admin";
@@ -19,3 +19,8 @@ export function canUpdateCourseSections({
 }) {
   return role === "admin";
 }
+
+export const wherePublicCourseSections = eq(
+  CourseSectionTable.status,
+  "public",
+);
