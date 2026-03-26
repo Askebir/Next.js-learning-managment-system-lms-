@@ -1,7 +1,30 @@
 import { db } from "@/src";
-import { CourseProductTable, ProductTable } from "@/src/drizzle/schema";
-import { eq } from "drizzle-orm";
+import {
+  CourseProductTable,
+  ProductTable,
+  PurchaseTable,
+} from "@/src/drizzle/schema";
+import { and, eq, isNull } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
+
+export async function userOwnsProduct({
+  userId,
+  productId,
+}: {
+  userId: string;
+  productId: string;
+}) {
+  const existingPurcase = await db.query.PurchaseTable.findFirst({
+    where: and(
+      eq(PurchaseTable.productId, productId),
+      eq(PurchaseTable.userId, userId),
+      isNull(PurchaseTable.refundedAt),
+    ),
+  });
+
+  return existingPurcase != null;
+}
+
 // Insert Product
 export async function insertProduct(
   data: typeof ProductTable.$inferInsert & { courseIds?: string[] },
@@ -59,14 +82,12 @@ export async function updateProduct(
 
     // Insert new relations
     if (courseIds.length > 0) {
-      await db
-        .insert(CourseProductTable)
-        .values(
-          courseIds.map((courseId) => ({
-            productId: updatedProduct.id,
-            courseId,
-          })),
-        );
+      await db.insert(CourseProductTable).values(
+        courseIds.map((courseId) => ({
+          productId: updatedProduct.id,
+          courseId,
+        })),
+      );
     }
 
     revalidatePath("/admin/products");
