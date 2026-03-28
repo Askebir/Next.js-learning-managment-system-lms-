@@ -1,6 +1,8 @@
+import { Accordion, AccordionTrigger } from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
 import {
   Card,
+  CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
@@ -102,6 +104,23 @@ export default async function ProductPage({
                 )}
               </CardDescription>
             </CardHeader>
+            <CardContent>
+              <Accordion type="multiple">
+                {course.courseSections.map((section) => (
+                  <AccordionTrigger className="flex gap-2">
+                    <div className="flex flex-col grow">
+                      <span className="text-lg">{section.name}</span>
+                      <span className="text-muted-foreground">
+                        {formatPlural(section.lessons.length, {
+                          plural: "lessons",
+                          singular: "lesson",
+                        })}
+                      </span>
+                    </div>
+                  </AccordionTrigger>
+                ))}
+              </Accordion>
+            </CardContent>
           </Card>
         ))}
       </div>
