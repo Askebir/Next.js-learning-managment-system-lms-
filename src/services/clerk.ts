@@ -1,7 +1,7 @@
 import { auth, clerkClient } from "@clerk/nextjs/server";
 import { UserRole, UserTable } from "../drizzle/schema";
 import { getUserIdTag } from "../features/users/cache";
-import { cacheTag } from "next/cache";
+
 import { db } from "../index";
 
 import { eq } from "drizzle-orm";
@@ -37,9 +37,6 @@ export function syncClerkUserMetadata(user: {
 }
 
 async function getUser(id: string) {
-  cacheTag(getUserIdTag(id));
-  console.log("called");
-
   return db.query.UserTable.findFirst({
     where: eq(UserTable.id, id),
   });

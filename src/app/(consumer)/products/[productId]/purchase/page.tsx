@@ -1,4 +1,13 @@
+import { db } from "@/src";
 import { LoadingSpinner } from "@/src/components/LoadingSpinner";
+import PageHeader from "@/src/components/PageHeader";
+import { ProductTable } from "@/src/drizzle/schema";
+import { userOwnsProduct } from "@/src/features/products/db/products";
+import { wherePublicProducts } from "@/src/features/products/permissions/lessons";
+import { getCurrentUser } from "@/src/services/clerk";
+import { SignIn, SignUp } from "@clerk/nextjs";
+import { and, eq } from "drizzle-orm";
+import { notFound, redirect } from "next/navigation";
 import { Suspense } from "react";
 
 export default function PurchasePage({
@@ -10,7 +19,6 @@ export default function PurchasePage({
 }) {
   return (
     <Suspense fallback={<LoadingSpinner className="my-6 size-36 mx-auto" />}>
-      <LoadingSpinner className="my-6 size-36 mx-auto" />
       <SuspendedComponent params={params} searchParams={searchParams} />
     </Suspense>
   );
@@ -23,5 +31,55 @@ async function SuspendedComponent({
   params: Promise<{ productId: string }>;
   searchParams: Promise<{ authMode: string }>;
 }) {
-  return null;
+  const { productId } = await params;
+  const { authMode } = await searchParams;
+  const { user } = await getCurrentUser({ allData: true });
+  const product = await getPublicProduct(productId);
+
+  if (product == null) return notFound();
+  if (user != null) {
+    if (await userOwnsProduct({ userId: user.id, productId })) {
+      redirect("/courses");
+    }
+
+    return (
+      <div className="container my-6 ">
+        <StripeCheckoutForm product={product} user={user} />
+      </div>
+    );
+  }
+
+  const isSignUp = authMode === "signUp";
+
+  return (
+    <div className="container my-6 flex flex-col items-center">
+      <PageHeader title="You need an account to make a purchase" />
+      {isSignUp ? (
+        <SignUp
+          routing="hash"
+          signInUrl={`/products/${productId}/purchase?authMode= signIn`}
+          forceRedirectUrl={`/products/${productId}/purchase`}
+        />
+      ) : (
+        <SignIn
+          routing="hash"
+          signUpUrl={`/products/${productId}/purchase?authMode=signUp`}
+          forceRedirectUrl={`/products/${productId}/purchase`}
+        />
+      )}
+    </div>
+  );
+}
+
+async function getPublicProduct(id: string) {
+  return db.query.ProductTable.findFirst({
+    columns: {
+      name: true,
+      id: true,
+      imageUrl: true,
+      description: true,
+      priceInDollars: true,
+    },
+    where: and(eq(ProductTable.id, id), wherePublicProducts),
+  });
 }
