@@ -1,4 +1,9 @@
-import { Accordion, AccordionTrigger } from "@/components/ui/accordion";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -23,6 +28,7 @@ import { sumArray } from "@/src/lib/sumArray";
 import { getUserCoupon } from "@/src/lib/useCountryHeader";
 import { getCurrentUser } from "@/src/services/clerk";
 import { and, asc, eq } from "drizzle-orm";
+import { VideoIcon } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -107,17 +113,39 @@ export default async function ProductPage({
             <CardContent>
               <Accordion type="multiple">
                 {course.courseSections.map((section) => (
-                  <AccordionTrigger className="flex gap-2">
-                    <div className="flex flex-col grow">
-                      <span className="text-lg">{section.name}</span>
-                      <span className="text-muted-foreground">
-                        {formatPlural(section.lessons.length, {
-                          plural: "lessons",
-                          singular: "lesson",
-                        })}
-                      </span>
-                    </div>
-                  </AccordionTrigger>
+                  <AccordionItem key={section.id} value={section.id}>
+                    <AccordionTrigger className="flex gap-2">
+                      <div className="flex flex-col grow">
+                        <span className="text-lg">{section.name}</span>
+                        <span className="text-muted-foreground">
+                          {formatPlural(section.lessons.length, {
+                            plural: "lessons",
+                            singular: "lesson",
+                          })}
+                        </span>
+                      </div>
+                    </AccordionTrigger>
+                    <AccordionContent className="flex flex-col gap-2">
+                      {section.lessons.map((lesson) => (
+                        <div
+                          key={lesson.id}
+                          className="flex items-center gap-2 text-base"
+                        >
+                          <VideoIcon className="size-4" />
+                          {lesson.status === "preview" ? (
+                            <Link
+                              href={`/course/${course.id}/lessons/${lesson.id}`}
+                              className="underline  text-fuchsia-400"
+                            >
+                              {lesson.name}
+                            </Link>
+                          ) : (
+                            lesson.name
+                          )}
+                        </div>
+                      ))}
+                    </AccordionContent>
+                  </AccordionItem>
                 ))}
               </Accordion>
             </CardContent>
