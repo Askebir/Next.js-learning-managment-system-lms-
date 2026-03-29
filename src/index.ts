@@ -1,8 +1,13 @@
+import { neon } from "@neondatabase/serverless";
 import { drizzle } from "drizzle-orm/neon-http";
+const sql = neon(process.env.DATABASE_URL!);
+export const db = drizzle({ client: sql });
 
-import * as schema from "./drizzle/schema";
+// import { drizzle } from "drizzle-orm/neon-http";
 
-export const db = drizzle(process.env.DATABASE_URL!, { schema });
+// import * as schema from "./drizzle/schema";
+
+// export const db = drizzle(process.env.DATABASE_URL!, { schema });
 
 // import { drizzle } from 'drizzle-orm/neon-http';
 
