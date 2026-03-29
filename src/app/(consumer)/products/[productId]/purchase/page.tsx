@@ -5,6 +5,7 @@ import { ProductTable } from "@/src/drizzle/schema";
 import { userOwnsProduct } from "@/src/features/products/db/products";
 import { wherePublicProducts } from "@/src/features/products/permissions/lessons";
 import { getCurrentUser } from "@/src/services/clerk";
+import { StripeCheckoutForm } from "@/src/services/stripe/components/StripeCheckoutForm";
 import { SignIn, SignUp } from "@clerk/nextjs";
 import { and, eq } from "drizzle-orm";
 import { notFound, redirect } from "next/navigation";

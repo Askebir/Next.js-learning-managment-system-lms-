@@ -1,3 +1,5 @@
+"use server";
+
 import { getUserCoupon } from "@/src/lib/useCountryHeader";
 import { stripeServerClient } from "../stripeServer";
 
@@ -46,6 +48,7 @@ export async function getClientSessionSecret(
     },
   });
 
-  if (session.client_secret == null) throw new Error("client secret is nulll");
-  return session.cancel_url;
+  if (session.client_secret == null) throw new Error("Client secret is null");
+
+  return session.client_secret;
 }
