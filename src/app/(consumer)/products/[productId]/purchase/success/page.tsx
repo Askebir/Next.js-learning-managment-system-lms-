@@ -20,9 +20,7 @@ export default async function ProductPurchaseSuccessPage({
       <div className="flex gap-16 items-center justify-between">
         <div className="flex flex-col gap-4 items-start">
           <div className="text-3xl font-semibold">Purchase Successful</div>
-          <div className="text-xl">
-            Thank you for purchasing ${product.name}
-          </div>
+          <div className="text-xl">Thank you for purchasing {product.name}</div>
           <Button asChild className="text-xl h-auto py-4 px-8 rounded-lg">
             <Link href="/courses">View My Course</Link>
           </Button>

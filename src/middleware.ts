@@ -38,11 +38,13 @@ export default clerkMiddleware(async (auth, req) => {
       : req,
   );
 
-  if (decision.isDenied()) return forbidden();
+  if (decision.isDenied()) return new NextResponse(null, { status: 403 });
 
   if (isAdminRoute(req)) {
     const user = await auth.protect();
-    if (user.sessionClaims.role !== "admin") return notFound();
+    if (user.sessionClaims.role !== "admin") {
+      return new NextResponse(null, { status: 403 });
+    }
   }
 
   if (!isPublicRoute(req)) {

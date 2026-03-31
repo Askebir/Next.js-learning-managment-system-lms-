@@ -66,25 +66,19 @@ async function processStripeCheckout(checkoutSession: Stripe.Checkout.Session) {
     (cp: { courseId: string }) => cp.courseId,
   );
 
-  db.transaction(async (trx: any) => {
-    try {
-      await addUserCourseAccess({ userId: user.id, courseIds }, trx);
-      await insertPurchase(
-        {
-          stripeSessionId: checkoutSession.id,
-          pricePaidInCents:
-            checkoutSession.amount_total || product.priceInDollars * 100,
-          productDetails: product,
-          userId: user.id,
-          productId,
-        },
-        trx,
-      );
-    } catch (error) {
-      trx.rollback();
-      throw error;
-    }
-  });
+  try {
+    await addUserCourseAccess({ userId: user.id, courseIds });
+    await insertPurchase({
+      stripeSessionId: checkoutSession.id,
+      pricePaidInCents:
+        checkoutSession.amount_total || product.priceInDollars * 100,
+      productDetails: product,
+      userId: user.id,
+      productId,
+    });
+  } catch (error) {
+    throw error;
+  }
 
   return productId;
 }

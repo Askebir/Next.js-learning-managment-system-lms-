@@ -5,11 +5,16 @@ import { getUserIdTag } from "../features/users/cache";
 import { db } from "../index";
 
 import { eq } from "drizzle-orm";
+import { redirect } from "next/navigation";
 
 const client = await clerkClient();
 
 export async function getCurrentUser({ allData = false } = {}) {
   const { userId, sessionClaims, redirectToSignIn } = await auth();
+
+  if (userId != null && sessionClaims.dbId == null) {
+    redirect("/api/clerk/syncUsers");
+  }
 
   return {
     clerkUserId: userId,
