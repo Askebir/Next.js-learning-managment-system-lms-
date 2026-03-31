@@ -14,3 +14,5 @@ export function canUpdateProducts({ role }: { role: UserRole | undefined }) {
 }
 
 export const wherePublicProducts = eq(ProductTable.status, "public");
+
+
