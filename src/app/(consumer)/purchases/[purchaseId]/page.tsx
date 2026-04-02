@@ -7,7 +7,21 @@ import { stripeServerClient } from "@/src/services/stripe/stripeServer";
 import { and, eq } from "drizzle-orm";
 import { notFound } from "next/navigation";
 import Stripe from "stripe";
-import { Suspense } from "react";
+import { Fragment, Suspense } from "react";
+import PageHeader from "@/src/components/PageHeader";
+import { Button } from "@/components/ui/button";
+import Link from "next/link";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Badge } from "@/src/components/ui/badge";
+import { formatDate, formatPrice } from "@/src/lib/formatters";
+import { cn } from "@/lib/utils";
 
 export default async function PurchasePage({
   params,
@@ -40,6 +54,62 @@ async function SuspenseBoundary({ purchaseId }: { purchaseId: string }) {
     purchase.stripeSessionId,
     purchase.pricePaidInCents,
     purchase.refundedAt != null,
+  );
+
+  return (
+    <>
+      <PageHeader title={purchase.productDetails.name}>
+        {receiptUrl && (
+          <Button variant="outline" asChild>
+            <Link target="blank" href={receiptUrl}>
+              View Receipt
+            </Link>
+          </Button>
+        )}
+      </PageHeader>
+
+      <Card>
+        <CardHeader className="pb-4">
+          <div className="flex justify-between items-start gap-4">
+            <div className="flex-col gap-4">
+              <CardTitle>Receipt</CardTitle>
+              <CardDescription>ID:{purchaseId}</CardDescription>
+            </div>
+            <Badge>{purchase.refundedAt ? "refunded" : "Paid"}</Badge>
+          </div>
+        </CardHeader>
+        <CardContent className="pb-4 grid grid-cols-2 gap-8 border-t pt-4">
+          <div>
+            <label className=" teext-sm text-muted-foreground">Date</label>
+            <div>{formatDate(purchase.createdAt)}</div>
+          </div>
+          <div>
+            <label className=" teext-sm text-muted-foreground">Product</label>
+            <div>{purchase.productDetails.name}</div>
+          </div>
+
+          <div>
+            <label className=" teext-sm text-muted-foreground">Customer</label>
+            <div>{user.name}</div>
+          </div>
+          <div>
+            <label className=" teext-sm text-muted-foreground">Seller</label>
+            <div>Web Dev Simplified</div>
+          </div>
+        </CardContent>
+
+        <CardFooter className="grid grid-cols-2 gap-y-4 gap-x-8 border-t pt-4">
+          {priceingRows.map(({ label, amountInDollars, isBold }) => (
+            <Fragment key={label}>
+              <div className={cn(isBold && "font-bold")}>{label}</div>
+              <div>
+                {formatPrice(amountInDollars, { showZeroAsNumber: true })}
+              </div>
+            </Fragment>
+          ))}
+        </CardFooter>
+      </Card>
+    </>
   );
 }
 
@@ -133,7 +203,7 @@ function getPriceingRows(
   }
 
   if (priceingRows.length === 0) {
-    return [{ lable: "Total", amountInDollars: total / 100, isBold: true }];
+    return [{ label: "Total", amountInDollars: total / 100, isBold: true }];
   }
 
   return [
