@@ -3,6 +3,7 @@ import { LoadingSpinner } from "@/src/components/LoadingSpinner";
 import { PurchaseTable } from "@/src/drizzle/schema";
 import { createdAt } from "@/src/drizzle/schemaHelper";
 import { getCurrentUser } from "@/src/services/clerk";
+import { stripeServerClient } from "@/src/services/stripe/stripeServer";
 import { and, eq } from "drizzle-orm";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
@@ -33,6 +34,12 @@ async function SuspenseBoundary({ purchaseId }: { purchaseId: string }) {
   const purchase = await getPurchase({ userId, id: purchaseId });
 
   if (purchase == null) return notFound();
+
+  const { receiptUrl, priceingRows } = await getStripeDetails(
+    purchase.stripeSessionId,
+    purchase.pricePaidInCents,
+    purchase.refundedAt != null,
+  );
 }
 
 async function getPurchase({ userId, id }: { userId: string; id: string }) {
@@ -46,4 +53,18 @@ async function getPurchase({ userId, id }: { userId: string; id: string }) {
     },
     where: and(eq(PurchaseTable.id, id), eq(PurchaseTable.userId, userId)),
   });
+}
+
+async function getStripeDetails(
+  stripeSessionId: string,
+  pricePaidInCents: number,
+  isRefunded: boolen,
+) {
+  const { payment_intent, total_details, amount_total, amount_subtotal } =
+    await stripeServerClient.checkout.sessions.reetrive(stripeSessionId, {
+      expand: [
+        "payment_intent.latest_charge",
+        "total_details.breakdown.discounts",
+      ],
+    });
 }
