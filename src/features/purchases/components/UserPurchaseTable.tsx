@@ -4,6 +4,7 @@ import {
   TableBody,
   TableCell,
   TableHead,
+  TableHeader,
   TableRow,
 } from "@/components/ui/table";
 import PurchasePage from "@/src/app/(consumer)/products/[productId]/purchase/page";
@@ -34,13 +35,13 @@ export function UserPurchaseTable({
 }) {
   return (
     <Table>
-      <TableHead>
+      <TableHeader>
         <TableRow>
           <TableHead>Product</TableHead>
           <TableHead>Amount</TableHead>
           <TableHead>Actions</TableHead>
         </TableRow>
-      </TableHead>
+      </TableHeader>
       <TableBody>
         {purchases.map((purchase) => (
           <TableRow key={purchase.id}>

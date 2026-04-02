@@ -15,7 +15,9 @@ export default function PurchasesPage() {
   return (
     <div>
       <PageHeader title="Purchase History" />
-      <Suspense fallback={<UserPurchaseTableSkeleton />}></Suspense>
+      <Suspense fallback={<UserPurchaseTableSkeleton />}>
+        <SuspenseBoundary />
+      </Suspense>
     </div>
   );
 }
