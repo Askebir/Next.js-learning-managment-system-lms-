@@ -48,7 +48,7 @@ async function SuspenseBoundary({ purchaseId }: { purchaseId: string }) {
 
   const purchase = await getPurchase({ userId, id: purchaseId });
 
-  if (purchase == null) return notFound();
+  if (purchase == null) return notFound()
 
   const { receiptUrl, priceingRows } = await getStripeDetails(
     purchase.stripeSessionId,
