@@ -17,18 +17,31 @@ import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import {
   Card,
+  CardContent,
   CardDescription,
+  CardFooter,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
 import { formatPlural } from "@/src/lib/formatters";
+import {
+  SkeletonArray,
+  SkeletonButton,
+  SkeletonText,
+} from "@/src/components/Skeleton";
 
 export default function CoursesPage() {
   return (
     <div className="container my-6">
       <PageHeader title="My Courses" />
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-        <Suspense fallback={null}>
+        <Suspense
+          fallback={
+            <SkeletonArray amount={4}>
+              <SkeletonCourseCard />
+            </SkeletonArray>
+          }
+        >
           <CourseGrid />
         </Suspense>
       </div>
@@ -69,8 +82,45 @@ async function CourseGrid() {
           })}
         </CardDescription>
       </CardHeader>
+      <CardContent className="line-clamp-3" title={course.description}>
+        {course.description}
+      </CardContent>
+      <div className="grow" />
+      <CardFooter>
+        <Button asChild>
+          <Link href={`/courses/${course.id}`}>View Course</Link>
+        </Button>
+      </CardFooter>
+      <div
+        className="bg-accent h-2 -mt-2"
+        style={{
+          width: `${(course.lessonComplete / course.lessonsCount) * 100}%`,
+        }}
+      ></div>
     </Card>
   ));
+}
+
+function SkeletonCourseCard() {
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>
+          <SkeletonText className="w-3/4" />
+        </CardTitle>
+        <CardDescription>
+          <SkeletonText className="w-1/2" />
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
+        <SkeletonText rows={3} />
+      </CardContent>
+      <div className="grow" />
+      <CardFooter>
+        <SkeletonButton />
+      </CardFooter>
+    </Card>
+  );
 }
 
 async function getUserCourses(userId: string) {
