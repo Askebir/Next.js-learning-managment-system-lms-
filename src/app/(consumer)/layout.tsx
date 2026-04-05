@@ -32,7 +32,7 @@ function Navbar() {
             <AdminLink />
             <Link
               className="hover:bg-accent/10 flex items-center px-2"
-              href="/course"
+              href="/courses"
             >
               My Course
             </Link>
