@@ -17,10 +17,10 @@ export default async function CoursePageLayout({
   params,
   children,
 }: {
-  params: { courseId: string }; // ✅ FIXED
+  params: { courseId: string };
   children: ReactNode;
 }) {
-  const { courseId } = params; // ✅ no await
+  const { courseId } = params;
 
   const course = await getCourse(courseId);
   if (course == null) return notFound();
@@ -114,7 +114,7 @@ function mapCourse(
       }[];
     }[];
   },
-  completedLessonIds: string[], // ✅ FIXED
+  completedLessonIds: string[],
 ) {
   return {
     ...course,
