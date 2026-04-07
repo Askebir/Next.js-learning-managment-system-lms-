@@ -5,7 +5,7 @@ import { eq } from "drizzle-orm";
 import { notFound } from "next/navigation";
 import { ReactNode } from "react";
 
-export default async function ({
+export default async function LessonPage({
   params,
 }: {
   params: Promise<{ courseId: string }>;
