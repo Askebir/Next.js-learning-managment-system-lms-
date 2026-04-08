@@ -59,7 +59,7 @@ export function CoursePageClient({
                       "bg-accent/75 text-accent-foreground",
                   )}
                 >
-                  <Link href={`/course/${course.id}/lessons/${lesson.id}`}>
+                  <Link href={`/courses/${course.id}/lessons/${lesson.id}`}>
                     <VideoIcon />
                     {lesson.name}
                     {lesson.isComplete && (

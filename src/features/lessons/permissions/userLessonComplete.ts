@@ -16,14 +16,19 @@ export async function canUpdateUserLessonCompleteStatus(
   const [courseAccess] = await db
     .select({ courseId: CourseTable.id })
     .from(UserCourseAccessTable)
+
     .innerJoin(CourseTable, eq(CourseTable.id, UserCourseAccessTable.courseId))
+
     .innerJoin(
-      LessonTable,
+      CourseSectionTable,
       and(
-        eq(LessonTable.sectionId, CourseSectionTable.id),
+        eq(CourseSectionTable.courseId, CourseTable.id),
         wherePublicCourseSections,
       ),
     )
+
+    .innerJoin(LessonTable, eq(LessonTable.sectionId, CourseSectionTable.id))
+
     .where(
       and(
         eq(LessonTable.id, lessonId),

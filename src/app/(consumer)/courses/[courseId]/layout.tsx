@@ -27,16 +27,19 @@ export default async function CoursePageLayout({
   if (course == null) return notFound();
 
   return (
-    <div className="grid grid-cols-[300px,1fr] gap-8 container">
-      <div className="py-4">
-        <div className="text-lg font-semibold">{course.name}</div>
+    <div className="flex w-full min-h-screen">
+      {/* Sidebar */}
+      <div className="w-[300px] border-r p-4">
+        <div className="text-lg font-semibold mb-4">{course.name}</div>
         <Suspense
           fallback={<CoursePageClient course={mapCourse(course, [])} />}
         >
           <SuspenseBoundary course={course} />
         </Suspense>
       </div>
-      <div className="py-4">{children}</div>
+
+      {/* Content */}
+      <div className="flex-1 p-6">{children}</div>
     </div>
   );
 }
