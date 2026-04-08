@@ -2,9 +2,11 @@ import { db } from "@/src";
 import {
   CourseSectionTable,
   CourseTable,
+  LessonTable,
   UserCourseAccessTable,
 } from "@/src/drizzle/schema";
 import { and, eq } from "drizzle-orm";
+import { wherePublicCourseSections } from "../../courseSections/permissions/section";
 
 export async function canUpdateUserLessonCompleteStatus(
   user: { userId: string | undefined },
@@ -16,7 +18,19 @@ export async function canUpdateUserLessonCompleteStatus(
     .from(UserCourseAccessTable)
     .innerJoin(CourseTable, eq(CourseTable.id, UserCourseAccessTable.courseId))
     .innerJoin(
-      CourseSectionTable,
-      and(eq(CourseSectionTable.courseId, CourseTable.id)),
-    );
+      LessonTable,
+      and(
+        eq(LessonTable.sectionId, CourseSectionTable.id),
+        wherePublicCourseSections,
+      ),
+    )
+    .where(
+      and(
+        eq(LessonTable.id, lessonId),
+        eq(UserCourseAccessTable.userId, user.userId),
+      ),
+    )
+    .limit(1);
+
+  return courseAccess != null;
 }

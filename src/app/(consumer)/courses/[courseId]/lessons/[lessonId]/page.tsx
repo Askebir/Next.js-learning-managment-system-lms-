@@ -13,6 +13,7 @@ import {
   canViewLesson,
   wherePublicLessons,
 } from "@/src/features/lessons/permissions/lessons";
+import { canUpdateUserLessonCompleteStatus } from "@/src/features/lessons/permissions/userLessonComplete";
 import { getCurrentUser } from "@/src/services/clerk";
 import { and, eq } from "drizzle-orm";
 import { CheckSquare2Icon, LockIcon, XSquareIcon } from "lucide-react";
@@ -74,7 +75,11 @@ async function SuspenseBoundary({
         {canView ? (
           <YouTubeVideoPlayer
             videoId={lesson.youtubeVideoId}
-            onFinishedVideo={undefined}
+            onFinishedVideo={
+              !isLessonComplete && canUpdateCompletionStatus
+                ? canUpdateUserLessonCompleteStatus.bind(null, lesson.id, true)
+                : undefined
+            }
           />
         ) : (
           <div className="flex items-center justify-center bg-primary-foreground h-full w-full">
@@ -89,19 +94,22 @@ async function SuspenseBoundary({
             <Button variant="outline" asChild>
               <Link href="">Previous</Link>
             </Button>
-            <ActionButton action={null} variant="outline">
-              <div className="flex gap-2 items-center">
-                {isLessonComplete ? (
-                  <>
-                    <CheckSquare2Icon /> Mark Incomplete
-                  </>
-                ) : (
-                  <>
-                    <XSquareIcon /> Mark Complete
-                  </>
-                )}
-              </div>
-            </ActionButton>
+            {canUpdateUserLessonCompleteStatus && (
+              <ActionButton action={null} variant="outline">
+                <div className="flex gap-2 items-center">
+                  {isLessonComplete ? (
+                    <>
+                      <CheckSquare2Icon /> Mark Incomplete
+                    </>
+                  ) : (
+                    <>
+                      <XSquareIcon /> Mark Complete
+                    </>
+                  )}
+                </div>
+              </ActionButton>
+            )}
+
             <Button variant="outline" asChild>
               <Link href="">Next</Link>
             </Button>
