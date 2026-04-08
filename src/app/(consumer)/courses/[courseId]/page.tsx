@@ -5,7 +5,7 @@ import { eq } from "drizzle-orm";
 import { notFound } from "next/navigation";
 import { ReactNode } from "react";
 
-export default async function LessonPage({
+export default async function CoursePage({
   params,
 }: {
   params: Promise<{ courseId: string }>;
@@ -14,6 +14,7 @@ export default async function LessonPage({
   const course = await getCourse(courseId);
 
   if (course == null) return notFound();
+
   return (
     <div className="my-6 container">
       <PageHeader className="mb-6" title={course.name} />

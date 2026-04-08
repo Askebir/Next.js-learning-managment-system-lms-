@@ -8,6 +8,7 @@ import {
   LessonTable,
   UserLessonComleteTable,
 } from "@/src/drizzle/schema";
+import { updateLessonCompleteStatus } from "@/src/features/lessons/actions/userLessonComplete";
 import { YouTubeVideoPlayer } from "@/src/features/lessons/components/YouTubeVideoPlayer";
 import {
   canViewLesson,
@@ -77,7 +78,7 @@ async function SuspenseBoundary({
             videoId={lesson.youtubeVideoId}
             onFinishedVideo={
               !isLessonComplete && canUpdateCompletionStatus
-                ? canUpdateUserLessonCompleteStatus.bind(null, lesson.id, true)
+                ? updateLessonCompleteStatus.bind(null, lesson.id, true)
                 : undefined
             }
           />
@@ -94,8 +95,15 @@ async function SuspenseBoundary({
             <Button variant="outline" asChild>
               <Link href="">Previous</Link>
             </Button>
-            {canUpdateUserLessonCompleteStatus && (
-              <ActionButton action={null} variant="outline">
+            {canUpdateCompletionStatus && (
+              <ActionButton
+                action={updateLessonCompleteStatus.bind(
+                  null,
+                  lesson.id,
+                  !isLessonComplete,
+                )}
+                variant="outline"
+              >
                 <div className="flex gap-2 items-center">
                   {isLessonComplete ? (
                     <>

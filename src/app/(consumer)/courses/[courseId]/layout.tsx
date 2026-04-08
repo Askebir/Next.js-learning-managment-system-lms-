@@ -1,44 +1,41 @@
+import { notFound } from "next/navigation";
+import { ReactNode, Suspense } from "react";
+import { CoursePageClient } from "./_client";
 import { db } from "@/src";
+import { asc, eq } from "drizzle-orm";
 import {
   CourseSectionTable,
   CourseTable,
   LessonTable,
   UserLessonComleteTable,
+  UserLessonCompleteTableRelationships,
 } from "@/src/drizzle/schema";
 import { wherePublicCourseSections } from "@/src/features/courseSections/permissions/section";
 import { wherePublicLessons } from "@/src/features/lessons/permissions/lessons";
 import { getCurrentUser } from "@/src/services/clerk";
-import { asc, eq } from "drizzle-orm";
-import { notFound } from "next/navigation";
-import { ReactNode, Suspense } from "react";
-import { CoursePageClient } from "./_client";
 
 export default async function CoursePageLayout({
   params,
   children,
 }: {
-  params: { courseId: string };
+  params: Promise<{ courseId: string }>;
   children: ReactNode;
 }) {
-  const { courseId } = params;
-
+  const { courseId } = await params;
   const course = await getCourse(courseId);
+
   if (course == null) return notFound();
 
   return (
-    <div className="grid grid-cols-[300px, 1fr] gap-8 container">
+    <div className="grid grid-cols-[300px,1fr] gap-8 container">
       <div className="py-4">
         <div className="text-lg font-semibold">{course.name}</div>
-
         <Suspense
-          fallback={
-            <CoursePageClient course={mapCourse(course, [])} /> // ✅ FIXED
-          }
+          fallback={<CoursePageClient course={mapCourse(course, [])} />}
         >
           <SuspenseBoundary course={course} />
         </Suspense>
       </div>
-
       <div className="py-4">{children}</div>
     </div>
   );
@@ -85,7 +82,6 @@ async function SuspenseBoundary({
   };
 }) {
   const { userId } = await getCurrentUser();
-
   const completedLessonIds =
     userId == null ? [] : await getCompletedLessonIds(userId);
 
@@ -118,12 +114,16 @@ function mapCourse(
 ) {
   return {
     ...course,
-    courseSections: course.courseSections.map((section) => ({
-      ...section,
-      lessons: section.lessons.map((lesson) => ({
-        ...lesson,
-        isComplete: completedLessonIds.includes(lesson.id),
-      })),
-    })),
+    courseSections: course.courseSections.map((section) => {
+      return {
+        ...section,
+        lessons: section.lessons.map((lesson) => {
+          return {
+            ...lesson,
+            isComplete: completedLessonIds.includes(lesson.id),
+          };
+        }),
+      };
+    }),
   };
 }
